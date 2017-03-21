@@ -1,0 +1,209 @@
+Dokumentacja Użytkownika
+
+Wymagania sprzętowe
+Instalacja
+
+
+
+Dokumentacja Techiczna
+
+Wykorzystane narzędzia:
+
+Programowanie:
+Android NDK
+Eclipse + CDT + ADT
+Microsoft Visual Studio
+
+Grafika:
+Blender
+GIMP
+Inkscape
+
+Dźwięk:
+Audacity
+LMMS
+
+Kompilacja
+
+Na wstępie musimy posiadać bibliotekę SFML w wersji >= 2.3.2 odpowiednią dla naszego systemu i kompilatora która dostępna jest na stronie: "http://www.sfml-dev.org/download.php". Można pobrać źródła biblioteki SFML i samemu ją skompilować jeżeli gotowe paczki będą niewystarczające.
+
+
+Kompilacja na platformę Android dla Eclipse
+
+Biblioteki dla platformy android niestety musimy skompilować własnoręcznie. Do tego celu pobieramy źródła najlepiej w wersji stabilnej. 
+
+Informacje jak to osiągnąć znajdziemy na stronie: 
+"https://github.com/SFML/SFML/wiki/Tutorial:-Building-SFML-for-Android"
+
+Dodatkowo musimy się zaopatrzyć w:
+-Eclipse IDE
+-dodatek CDT
+-dodatek ADT
+-Android SDK
+-Android NDK
+
+Po trudach budowania biblioteki możemy przejść do konfiguracji projektu. Najpierw klikamy ikonkę New przechodzimy do "Android->Android Project from Existing Code" i wybieramy folder EarthDefender. Pojawi się jeden projekt do zaimportowania na liście i klikamy Finish. Musimy jeszcze oznaczyć projekt jako C++ w tym celu klikamy ikonę New 
+"C/C++->Convert to a C/C++ Project (Adds C/C++ Nature)", wybieramy nasz projekt zaznaczamy "C++ Project" oraz "Project type->Makefile project->Android GCC". Teraz przechodzimy do "Project->Properties->C/C++ Build" i zmieniamy "Current toolchain" na Linux GCC, prawdopodobnie trzeba odznaczyć "Display compatible..." natomiast "Current builder" pozostawiamy na "Android Builder". Potem przechodzimy do "Project->Properties->C/C++ General->Paths and Symbols->Includes" i dodajemy następujące ścieżki:
+
+AndroidNDK/sources/sfml/include
+AndroidNDK/sources/cxx-stl/llvm-libc++/libcxx/include
+AndroidNDK/sources/cxx-stl/llvm-libc++abi/libcxxabi/include
+AndroidNDK/sources/android/support/include
+AndroidNDK/toolchains/x86-4.9/prebuilt/linux-x86_64/lib/gcc/i686-linux-android/4.9/include
+AndroidNDK/toolchains/x86-4.9/prebuilt/linux-x86_64/lib/gcc/i686-linux-android/4.9/include-fixed
+AndroidNDK/platforms/android-9/arch-x86/usr/include
+
+Jeżeli funkcje ze standardu C++11 nie będą rozpoznane przez algorytmy Code Analisis należy zmienić te błędy na warningi. Kompilacja przez ndk-build powinna przebiec normalnie.
+
+Następnie jeżeli nie istnieje konfiguracja to przechodzimy do "Run->Run Configurations" dodajemy konfiguracje "Android Application" wybieramy utworzony projekt.
+
+Przed kompilacją warto sprawdzić plik Application.mk czy APP_ABI zawiera naszą platformę, jeżeli nie wiemy jaką posiadamy możemy skompilować dla wszystkich dostępnych czyli "APP_ABI := armeabi armeabi-v7a x86 mips"
+
+
+
+Kompilacja na platformy desktopowe dla Code::Blocks
+
+Należy utworzyć nowy pusty projekt C++ w wybranym folderze. Następnie trzeba dodać rekursywnie pliki źródłowe z folderu "jni" do projektu (Project -> Add files recursively...). Kolejnym ważnym krokiem jest konfiguracja opcji budowania projektu (Project->Build options...). Zaznaczamy flagę -std=c++11, ustawiamy stałą w zakładce "Compiler settings->#defines" o nazwie NONANDROID. Przechodzimy do zakładki "Linker settings" i dodajemy następujące biblioteki: sfml-system, sfml-window, sfml-graphics, sfml-audio. W zakładce "Search directories->Compiler" dodajemy ścieżkę do folderu "SFML/include" a w zakładce "Search directories->Linker" ścieżkę do folderu "SFML/lib". Ostatnim krokiem jest ustawienie katalogu roboczego ponieważ nasz plik wykonywalny znajduje się zdala od zawartości gry, możemy albo zmienić w "Project->Properties->Build targets" wyjście kompilacji prosto do folderu assets lub ustawić pole "Execution working dir" na folder assets. Dodatkowo na systemach Windows może występować konieczność umieszczenia plików dll obok skompilowanego pliku wykonywalnego jeżeli projekt nie był skompilowany statycznie. 
+
+Jak skompilować projekt z biblioteką sfml statycznie możemy przeczytać na http://www.sfml-dev.org/tutorials/2.3/start-cb.php
+
+Kompilacja na platformy desktopowe dla Visual Studio
+
+Należy utworzyć nowy projekt C++ z istniejącego kodu (File -> New -> Project from existing code...). Następnie trzeba tak skonfigurować projekt, aby mógł on korzystać z biblioteki SFML. Aby to zrobić należy przejść do właściwości projektu (Project -> Properties). Konfiguracja powinna zostać wykonana pod platformy 64-bitowe (u góry Platform: x64). W polu Additional Include Directories (C/C++ -> General) trzeba podać ścieżkę do folderu Include SFML'a, a w polu Additional Library Directories (Linker -> General) ścieżkę do folderu lib. Aby ukończyć konfigurację SFML'a należy w polu Additional Dependencies (Linker -> Input) dodać następujące pliki:
+sfml-graphics-d.lib
+sfml-window-d.lib
+sfml-system-d.lib
+sfml-audio-d.lib
+sfml-audio-s-d.lib.
+Ostatnim krokiem w konfiguracji projektu jest ustawienie flagi NONANDROID, aby projekt skompilował się nie używając funkcji typowych dla Androida. Aby to zrobić należy w zakładce C/C++ -> Preprocessor w polu Preprocessor Definitions dodać "NONANDROID". Jeżeli wcześniej były tam wpisane inne flagi, następną można wpisać po oddzieleniu średnikiem. Aby projekt uruchomił się poprawnie może być konieczne umieszczenie plików DLL obok skompilowanego pliku wykonywalnego. Dodatkowo, aby zasoby takie jak grafiki oraz dźwięki zostały poprawnie załadowane muszą one znajdować się w folderze skompilowanego projektu. W tym calu należy przenieść zawartość folderu assets do folderu, w którym znajduje się plik EXE projektu.
+
+
+Kompilacja przy użyciu make dla systemów Linux
+
+Aktualnie jest możliwość kompilacji z pomocą programu make. Przygotowany został w tym celu plik linux.mk dla dystrybucji Linuxa. 
+
+Przykład użycia dla dystrybucji Debian 9.0 Stretch:
+
+Wymagane paczki:
+
+build-essential
+libsfml-dev >= 2.3.2
+libsfml
+
+Następnie z katalogu EarthDefender możemy uruchomić skrypt który dokona kompilacji makeforlinux.sh oraz skrypt startforlinux.sh który uruchomi poprawnie skompilowaną aplikację.
+
+Sktrypty te wykonują prostą czynność którą możemy wykonać sami. Przechodzimy do katalogu jni z poziomu konsoli. Wywołujemy komendę:
+Dla budowania:
+make -f linux.mk
+Dla usunięcia tymczasowych plików *.o:
+make -f linux.mk clean
+
+Możemy dodać parametr -jN dla zrównoleglenia kompilacji. np: make -f linux.mk -j4
+Aby aplikacja działała poprawnie należy uruchomić ją z katalogu assets. Dla większej wygody możemy po prostu przenieść plik wykonywalny do niego.
+
+
+
+Opis klas:
+
+
+Opis plików i katalogów:
+
+Główny katalog:
+jni - katalog z kodem źródłowym aplikacji w języku C++
+res - katalog zasobów aplikacji Android
+assets - katalog z zawartością multimedialną aplikacji
+AndroidManifest.xml - plik manifestu Aplikacji android który zostanie dodany do paczki APK
+
+Katalog jni:
+lang - katalog z plikami tłumaczeń *.inc które są inkludowane podczas kompilacji pliku lang.cpp
+Android.mk i Application.mk - pliki makefile dla programu ndk-build, zawierające opis jakie pliki mają zostać skompilowane i jakie biblioteki dodane do pliku wynikowego
+AnimatedGround.hpp/.cpp - deklaracja i definicja klasy AnimatedGround
+Animation.hpp/.cpp - deklaracja i definicja klasy bazowej Animation
+Base.hpp/.cpp - deklaracja i definicja klasy Base
+Bullet.hpp/.cpp - deklaracja i definicja klasy Bullet
+Coil.hpp - definicja klasy Coil dziedziczącej po Tower
+Conf.hpp/.cpp - deklaracja i definicja statycznej klasy Conf
+Enabledable.hpp - definicja małej bazowej klasy Enabledable
+Enemy.hpp/.cpp - deklaracja i definicja klasy Enemy
+FloatingDamage.hpp/.cpp - deklaracja i definicja klasy FloatingDamage
+Game.hpp/.cpp - deklaracja i definicja głównej klasy aplikacji Game
+Gatling.hpp/.cpp - deklaracja i definicja klasy Gatling dziedziczącej po Tower
+Gestures.hpp/.cpp - deklaracja i definicja statycznej klasy Gestures
+HaveButtons.hpp - definicja klasy bazowej HaveButtons
+Hoverable.hpp - definicja małej bazowej Hoverable dziedziczącej po Sizeable
+Lang.hpp/.cpp - deklaracja i definicja statycznej klasy Lang
+LightBomber.hpp - definicja klasy LightBomber dziedziczącej po Enemy
+LightCannon.hpp - definicja klasy LightCannon dziedziczącej po Tower
+LightHoverCraft.hpp - definicja klasy LightHoverCraft dziedziczącej po Enemy
+Listener.hpp - definicja abstrakcyjnej klasy Listener
+ListenerMessage.hpp - definicja klasy ListenerMessage
+log.hpp - definicja makr do logowania błędów i informacji debugowania
+main.cpp - główny plik źródłowy z definicją funkcji main
+MainMenu.hpp/.cpp - deklaracja i definicja klasy MainMenu dziedziczącej po sf::Drawable
+Map.hpp/.cpp - deklaracja i definicja klasy Map
+MenuView.hpp/.cpp - deklaracja i definicja klasy MenuView dziedziczącej po sf::Drawable, Textable, HaveButtons
+Observble.hpp - definicja klasy Observable
+Panel.hpp/.cpp - deklaracja i definicja klasy Panel dziedziczącej po sf::Drawable, Hoverable, Textable, PosReferencable, Textureable, HaveButtons
+PanelManager.hpp/.cpp - deklaracja i definicja klasy PanelManager dziedziczącej po sf::Drawable
+Path.hpp/.cpp - deklaracja i definicja klasy Path dziedziczącej po sf::Drawable, Positionable
+Positionable.hpp - definicja małej klasy bazowej Positionable
+PosReferenceable.hpp - definicja klasy bazowej PosReferenceable dziedziczącej po Positionable
+RocketLauncher.hpp - definicja klasy RocketLauncher dziedziczącej po Tower
+S.hpp - definiuje przestrzeń nazw S która zawiera stałe ciągi char*
+SfEventBridge.hpp - definicja klasy SfEventBridge dziedziczącej po Observable
+SimleButton.hpp/.cpp - deklaracja i definicja klasy SimpleButton
+Sizeable.hpp - definicja małej klasy bazowej Sizeable
+Sounds.hpp/.cpp - deklaracja i definicja statycznej klasy Sounds
+Textable.hpp - definicja małej klasy bazowej Textable
+Textureable.hpp - definicja małej klasy bazowej Textureable
+Textures.hpp/.cpp - deklaracja i definicja statycznej klasy Textures
+Tower.hpp/.cpp - deklaracja i definicja klasy Tower
+Vec3Enemy.hpp - deklaracja małej klasy Vec3Enemy
+Visible.hpp - deklaracja małej klasy bazowej Visible
+
+Opis klas:
+
+Klasy bazowe:
+Enabledable - zawiera pole enabled oraz metody pobierania i ustawiania
+Hoverable - zawiera pole hover oraz metodę isHover do sprawdzenia oraz checkHover do aktualizacji stanu
+Sizeable - zawiera pole size oraz metody pobrania i ustawienia
+Positionable - zawiera pole position oraz xyPosition oraz metody do modyfikacji i pobrania wartości
+Textureable - zawiera pole texture i texName oraz metodę do ustawienia tekstury i do pobrania texName
+Textable - zawiera pole text oraz dodatkowe pola informujące o centrowaniu kolorze i sposobie interpretacji tego tekstu
+Visible - zawiera pole visible oraz metody dostępu i modyfikacji
+PosReferenceable - dziedziczy po Positionable, reprezentuje obiekt którego pozycja jest dodatkowo opisana jak należy ją zinterpretować, czy jest podana absolutnie czy procentowowo oraz czy obszarem odniesienia jest rozmiar ekranu czy zadany obszar prostokątny
+Animation - dziedziczy po Positionable, sf::Drawable i Textureable, reprezentuje obiekt animowany, zawiera informacje o ilości i rozmiarze klatki, o ilości kolumn i wierszy w teksturze animacji oraz opóźnienie pomiędzy klatkami
+Listener - reprezentuje obiekt obserwatora implementując wzorzec projektowy Obserwator, jest klasą abstrakcyjną wymagającą implementacji metody notify
+Observable - reprezentuje obiekt obserwowalny, posiada wektor wskaźników na obiekty klasy Listener oraz pole lmsg klasy ListenerMessage
+HaveButtons - zawiera mapę std::string na SimpleButton oraz metody do zarejestrowania i wyrejestrowania obiektu klasy Listener dla wszystkich przycisków w mapie
+Tower - dziedziczy po sf::Drawable, Positionable i Textable, reprezentuje wieżę gracza, implementuje wszystkie zachowania a klasy po niej dziedziczące definiują w zasadzie konfiguracje tych parametrów, posiada też statyczne pole towerPrices przechowujące odpowiednie ceny dla danego poziomu
+Enemy - dziedziczy po sf::Drawable, Positionable, Textable, Enabledable i Observable, reprezentuje przeciwnika, podobnie jak klasa Tower zawiera statyczne pole enemyPrices przechowujące wartość nagrody otrzymanej za zniszczenie 
+
+Klasy statyczne:
+Conf - zawiera globalną konfigurację widoczną dla wszystkich klas
+Gestures - służy do obsługi urządzenia wejściowego (ekran dotykowy lub mysz), implementuje obsługę podstawowych gestów typu slide, pinch, tap
+Lang - przechowuje i udostępnia metody zmiany języka oraz tłumaczące id typu string na słowo typu string odpowiednie dla aktualnie wybranego języka
+Sounds - przechowuje wszystkie bufory dźwięku używane w aplikacji dostępne pod id typu string
+Textures - przechowuje wszystkie tekstury i udostępnia metodę dostępu
+
+Pozostałe klasy:
+Game - stanowi kręgosłup dla całej aplikacji, przechowuje referencje na okno oraz zawiera następujące obiekty map, panelManager, mainMenu, przechowuje też pewne informacje o grze, posiada publiczne metody które kolejno wywoływane są w pętli głównej aplikacji
+PanelManager - dziedziczy po sf::Drawable, zawiera mapę std::string na Panel, posiada interfejsy do otwierania i zamykania danych paneli bocznych oraz metody do zarejestrowania i wyrejestrowania obiektu klasy Listener dla wszystkich paneli
+Panel - dziedziczy po sf::Drawable, Hoverable, Textable, PosReferenceable, Texuteable, HaveButtons, reprezentuje boczny panel który posiada mapę przycisków
+MainMenu - dziedziczy po sf::Drawable, posiada mapę obiektów klasy MenuView, udostępnia dostęp do tej mapy przez referencję oraz pozwala na zarejestrowanie i wyrejestrowanie obiektu obserwatora dla wszystkich przycisków
+MenuView - dziedziczy po sf::Drawable, Textable, HaveButtons, reprezentuje pojedynczy widok który posiada mapę przycisków
+SimpleButton - dziedziczy po sf::Drawable, Observable, Textable, Textureable, Hoverable, Enabledable, Visible, PosReferencable, reprezentuje prosty przycisk który jest używany w klasie MenuView oraz Panel, przycisk posiada referencję na teksturę wyglądu oraz teksturę obrazka który opcjonalnie jest na nim wyświetlany
+Map - dziedziczy po sf::Drawable, Observable, Listener - posiada wektory wskaźników na Tower i Enemy, dodatkowo posiado pole klasy Base Path i AnimatedGround
+Path - dziedziczy po sf::Drawable, Positionable, reprezentuje ścieżkę od punktu startowego do bazy, przechowuje informacje o swoim położeniu w kliku wariantach dla różnych klas które tych informacji potrzebują. Ścieżkę można łatwo zainicjować zwykłym ciągiem znaków który składa się z 4 liter N S W E. 
+Base - dziedziczy po sf::Drawable, Positionable, Observable, reprezentuje bazę gracza, posiada pole typu Animation które jest rysowane, informacje o zderzeniu przeciwnika z bazą są przesyłane do zarejestrowanego obserwatora
+AnimatedGround - dziedziczy po Animation, reprezentuje animowane podłoże, aktualnie jest to tylko animowana trawa, w celu optymalizacji rysowania posiada tablicę sf::VertexArray vtiles która zawiera tylko aktualnie widoczne kafelki mapy zapisane jako trójkąty 
+Gatling - dziedziczy po Tower, karabin maszynowy przeci powietrzny
+LightCannon - dziedziczy po Tower, lekkie działko przeciw lądowe gracza
+Coil - dziedziczy po Tower, uniwersalna wieża gracza
+LightBomber - dziedziczy po Enemy, lekki pojazd powietrzny przeciwnika
+LightHoverCraft - dziedziczy po Enemy, lekki pojazd lądowy przeciwnika
+Vec3Enemy - prosta połączenie klasy sf::Vector2f i pola typu int wskazującego na klatkę animacji
+FloatingDamage - dziedziczy po sf::Drawable, Positionable, reprezentuje zadane obrażenia które unoszą się nad przeciwnikiem oraz nad bazą gracza, dodatkowo jest zastosowany mechanizm grupowania obrażeń w danym przedziale czasu
+Bullet - dziedziczy po sf::Drawable, Positionable, reprezentuje pocisk używany przez wyżutnie rakiet
+ListenerMessage - reprezentuje wiadomość wysyłaną przez obiekt obserwowany do obserwatora posiada takie pola jak classname objectname parentname oraz wskaźnik amorficzny sender oraz mapę string na string changes  
+SfEventBridge - służy jako pomost pomiędzy systemem zdarzeń w biblioetece SFML a wzorcem zaimplementowanym wzorcem obserwatora

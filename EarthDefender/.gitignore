@@ -1,0 +1,12 @@
+
+/bin
+/obj
+!/EarthDefender/bin/AndroidManifest.xml
+.classpath
+.cproject
+.project
+/.settings
+/libs
+cb.cbp
+cb.depend
+cb.layout

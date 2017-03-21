@@ -1,0 +1,14 @@
+*.[oa]
+EarthDefender
+Debug/
+.vs/
+Earth Defender - desktop.VC.db
+Earth Defender - desktop.VC.sln
+Earth Defender - desktop.VC.vcxproj
+Earth Defender - desktop.VC.vcxproj.filters
+font/
+img/
+sound/
+Earth Defender - desktop.sln
+Earth Defender - desktop.vcxproj
+Earth Defender - desktop.vcxproj.filters
